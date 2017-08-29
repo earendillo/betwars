@@ -4,7 +4,7 @@
     <title>betwars v0.0.1</title>
   </head>
   <body ng-app="myApp">
-
+      <!-- Admin's panel -->
       <div ng-controller="betwarsCtrl">
         <ul>
           <li ng-repeat="event in events">
@@ -13,7 +13,7 @@
               <ol>
                 <li ng-repeat="match in event.matches">
                   <div ng-hide="isEditForm">
-                    {{match.player1}} vs {{match.player2}} |
+                  match  id: {{match._id}} | {{match.player1}} vs {{match.player2}} |
                     {{match.winner ? match.winner : ""}} {{match.score ? "wins with score " + match.score : "score pending"}}
                     <button ng-click="isEditForm=true;">Edit</button>
                   </div>
@@ -21,7 +21,11 @@
                     <label for="editPlayer1">Edit player 1: </label><input ng-model="match.player1" name="editPlayer1" />
                     <label for="editPlayer2">Edit player 2: </label><input ng-model="match.player2" name="editPlayer2" />
                     <label for="score">Score: </label><input ng-model="match.score" name="score" />
-                    <label for="winner">Winner: </label><input ng-model="match.winner" name="winner" />
+                    <label for="winner">Winner: </label>
+                    <select ng-model="match.winner" name="winner">
+                      <option>{{match.player1}}</option>
+                      <option>{{match.player2}}</option>
+                    </select>
                     <button ng-click="isEditForm=false;">Save</button>
                   </div>
                 </li>
@@ -36,11 +40,8 @@
           </div>
 
           <div>
-            <label for="player1">Player 1</label>
-            <input type="text" ng-model="player1" name="player1" />
-
-            <label for="player2">Player 2</label>
-            <input type="text" ng-model="player2" name="player2" />
+            <label for="player1">Player 1</label><input type="text" ng-model="player1" name="player1" />
+            <label for="player2">Player 2</label><input type="text" ng-model="player2" name="player2" />
 
             <button ng-click="addMatch()">Add match</button>
             <ol>
@@ -52,31 +53,69 @@
           <input type="submit" value="Final submition" ng-click="createEvent()"/>
         </form>
       </div>
-      adfasdfasfasdfasdfasdfasfd
-      <div ng-controller='TestCtrl'>
-        Test test test test test
-        <ul>
-          <li ng-repeat="event in events">
-            {{event._id}} | {{event.name}}
-            <div>
+      
+    <!-- User's bets component -->
+    <div ng-controller="UserBetsCtrl">
+      <ul>
+        <li ng-repeat="event in events">
+          {{event._id}} | {{event.name}}
+          <div>
+            <ul>
+              <li ng-repeat="match in event.matches">
+                <div ng-show="!isBetPlaced">
+                <div ng-hide="isBetForm">
+                  match  id: {{match._id}} | {{match.player1}} vs {{match.player2}} |
+                  {{match.winner ? match.winner : ""}} {{match.score ? "wins with score " + match.score : "score pending"}}
+                  <button ng-click="isBetForm=true;">Bet</button>
+                </div>
+                <div ng-show="isBetForm">
+                  {{match.player1}} vs {{match.player2}} |
 
-              <ol>
-                <li ng-repeat="match in event.matches">
-                  <div>
-                    {{match.player1}} vs {{match.player2}} |
-                    {{match.winner ? match.winner : ""}} {{match.score ? "wins with score " + match.score : "score pending"}}
-                  </div>
-                  </li>
-              </ol>
-            </div>
-          </li>
-        </ul>
+                  <label for="userBetScore">Score: </label><input ng-model="user.bet.score" name="userBetScore" />
+                  <label for="userBetWinner">Winner: </label>
+                    <select ng-model="user.bet.winner" name="userBetWinner">
+                      <option>{{match.player1}}</option>
+                      <option>{{match.player2}}</option>
+                    </select>
+                  <button ng-click="isBetForm=false; isBetPlaced=true; placeBet()">Place my bet!</button>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+      <div>
+        <label for="userName">User name:</label>
+        <input type="text" ng-model="userName" name="userName" required/>
+
+      <button ng-click="sendUserBets()">Send my bets</button> Bets placed: {{userBets.length}}
+      </div>
     </div>
+
+    <!-- Bet results -->
+    <div ng-controller="ResultsCtrl">
+      Bets in UserService: {{usersBets.length}}
+      <ul>
+        <li ng-repeat="user in usersBets">
+          {{user.name}} bets:
+            <ul>
+              <li ng-repeat="event in user.events">
+                Event id: {{event._id}} | Event name: {{event.name}}
+                <ul>
+                   <li ng-repeat="match in event.matches">
+                     match  id: {{match._id}} | {{match.winner}} {{match.score}}
+                   </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+      </ul>
+    </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
     <script src="app.js"></script>
     <script src="services/match-service.js"></script>
     <script src="services/event-service.js"></script>
-
-
+    <script src="services/user-service.js"></script>
   </body>
 </html>
