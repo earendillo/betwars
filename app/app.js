@@ -1,3 +1,5 @@
+'use strict'
+
 angular.module('myApp', [
   'betwars.event',
   'betwars.users'
@@ -40,30 +42,54 @@ angular.module('myApp', [
     $scope.userBets = [];
     $scope.user = {};
 
+    $scope.userEvents = [];
+    console.log($scope.userEvents);
+
     $scope.placeBet = function() {
 
-      let bet = {
-        _id: this.match._id,
-        winner: $scope.user.bet.winner,
-        score: $scope.user.bet.score
+      const isEventPresent = () => {
+        return $scope.userEvents.some((element) => {
+          return this.$parent.event._id === element._id;
+        });
       };
-      console.log(events[0]._id);
-      $scope.userBets.push(bet);
 
+      if (isEventPresent()) {
+        let index = $scope.userEvents.findIndex((element) => element._id === this.$parent.event._id);
+
+        $scope.userEvents[index].matches.push({
+              _id: this.match._id,
+              winner: $scope.user.bet.winner,
+              score: $scope.user.bet.score
+            });
+      } else {
+        $scope.userEvents.push({
+              _id: this.$parent.event._id,
+                name: this.$parent.event.name,
+                matches: [
+                  {
+                        _id: this.match._id,
+                        winner: $scope.user.bet.winner,
+                        score: $scope.user.bet.score
+                      }
+                ]
+        });
+      }
+      console.log($scope.userEvents);
       $scope.user.bet.winner='';
       $scope.user.bet.score='';
-      console.log($scope.userBets);
     };
 
     $scope.sendUserBets = function(){
+
       let user = {
         name: $scope.userName,
-        bets: $scope.userBets
+        events: $scope.userEvents
       }
-      if ($scope.userBets.length>0) {
+      if ($scope.userEvents.length>0) {
         UserService.addUserBets(user);
         $scope.userBets = [];
         $scope.userName = '';
+        console.log('bets sent');
       }
     }
   }])
@@ -78,7 +104,7 @@ angular.module('myApp', [
 
 
      usersBets.forEach(function(user){
-         console.log('user', user);
+
          let userEvents = user.events;
 
          userEvents.forEach(function(bet) {
@@ -87,7 +113,6 @@ angular.module('myApp', [
            let matchResults = checkId(bet._id, events).matches;
 
            userBets.forEach(function(result) {
-             console.log(checkId(result._id, matchResults).winner === result.winner)
              if (checkId(result._id, matchResults).winner === result.winner) console.log(user.name, '+1');
              if (checkId(result._id, matchResults).score === result.score) console.log(user.name, '+2');
            });
